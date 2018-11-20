@@ -2,9 +2,12 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { promisify } from 'util'
 import * as request from 'request'
+import { Track } from './track'
+import { Playlist } from './playlist'
+import Axios, {AxiosResponse} from "axios";
 
-const writeFile = promisify(fs.writeFile)
-const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile);
+const readFile = promisify(fs.readFile);
 
 /**
  * Generate a random string
@@ -12,8 +15,8 @@ const readFile = promisify(fs.readFile)
  * @return        [description]
  */
 export function generateRandomString(length: number): string {
-	let text = ''
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 	for (let i = 0; i < length; i++) {
 		text += possible.charAt(Math.floor(Math.random() * possible.length))
@@ -28,7 +31,7 @@ export function generateRandomString(length: number): string {
  * @return       [description]
  */
 export async function saveTokenToFile(token: string): Promise<void> {
-	const filePath = path.join(__dirname, '/../refresh_token.txt')
+	const filePath = path.join(__dirname, '/../refresh_token.txt');
 	await writeFile(filePath, token)
 }
 
@@ -37,10 +40,10 @@ export async function saveTokenToFile(token: string): Promise<void> {
  * @return [description]
  */
 export async function getRefreshToken(): Promise<string> {
-	const filePath = path.join(__dirname, '/../refresh_token.txt')
+	const filePath = path.join(__dirname, '/../refresh_token.txt');
 
-	let token: string = await readFile(filePath, 'utf8')
-  token = token.trim()
+	let token: string = await readFile(filePath, 'utf8');
+  token = token.trim();
 	return token
 }
 
@@ -63,7 +66,7 @@ export async function fetchAuthToken(refreshToken: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     request.post(authOptions, function(error, response: request.Response, body: any) {
       if (error) {
-        console.log('error')
+        console.log('error');
         reject(error)
       }
       else if (!error && response.statusCode === 200) {
@@ -82,22 +85,138 @@ export async function fetchAuthToken(refreshToken: string): Promise<string> {
  * @param  accessToken [description]
  * @return             [description]
  */
-export async function getUserPlaylists(accessToken: string): Promise<{}[]> {
+export async function getUserPlaylists(accessToken: string): Promise<Playlist[]> {
   const options = {
     url: 'https://api.spotify.com/v1/me/playlists?limit=50',
     headers: { 'Authorization': 'Bearer ' + accessToken},
     json: true
-  }
+  };
 
-  return new Promise<{}[]>((resolve, reject) => {
+  return new Promise<Playlist[]>((resolve, reject) => {
     request.get(options, (error: Error, response: request.RequestResponse, body: any) => {
       if (error) {
         reject(error)
       } else if (response.statusCode === 200) {
-        resolve(body.items)
+        let playlists: Playlist[] = [];
+        for (let item of body.items) {
+          const playlist = new Playlist(item.id, item.name, item.uri);
+          playlists.push(playlist)
+        }
+        resolve(playlists)
       } else {
         reject(response)
       }
     })
   })
+}
+
+/**
+ * Get a users last 50 added tracks.
+ * @param  accessToken
+ * @return
+ */
+export async function getUserLastTracks(accessToken: string): Promise<Track[]> {
+  const options = {
+    url: 'https://api.spotify.com/v1/me/tracks?offset=0&limit=50',
+    headers: { 'Authorization': 'Bearer ' + accessToken},
+    json: true
+  };
+
+  return new Promise<Track[]>((resolve, reject) => {
+    request.get(options, (error: Error, response: request.RequestResponse, body: any) => {
+      if (error) {
+        reject(error)
+      } else if (response.statusCode === 200) {
+        let tracks: Track[] = [];
+        for (let item of response.body.items) {
+          let artist: string;
+          if (item.track.artists.length > 1) {
+            artist = '';
+            for (let i = 0; i < item.track.artists.length; i++) {
+              artist = `${item.track.artists[i].name}, `
+            }
+            artist = artist.substring(0, artist.length - 2)
+          } else {
+            artist = item.track.artists[0].name
+          }
+          let track = new Track(item.track.id, item.track.name, item.track.album.name, artist, new Date(item.added_at), item.track.uri);
+          tracks.push(track)
+        }
+        resolve(tracks)
+      } else {
+        reject(response)
+      }
+    })
+  })
+}
+
+/**
+ * Get an access token from spotify
+ * @return              [description]
+ * @param accessToken
+ * @param playlistId
+ * @param tracks
+ */
+export async function addTracksToPlaylist(playlistId: string, tracks: Track[], accessToken: string): Promise<void> {
+  let uriList: any = {uris: []};
+  uriList.uris = tracks.map((track) => track.uri);
+
+  await Axios.post(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, uriList,  {
+    headers: {
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
+/**
+ * Get tracks in a playlist
+ * @param  playlistId  [playlist id]
+ * @param  accessToken [access token]
+ * @return             [Promise<Track[]>]
+ */
+export async function getTracksInPlaylist(playlistId: string, accessToken: string): Promise<Track[]> {
+  const fields: string = 'items(added_at,track(name,uri,id,album.name,artists))';
+  const limit: number = 100;
+  const options = {
+    url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&fields=${fields}`,
+    headers: { 'Authorization': 'Bearer ' + accessToken},
+    json: true
+  };
+
+  return new Promise<Track[]>((resolve, reject) => {
+    request.get(options, (error: Error, response: request.RequestResponse, body: any) => {
+      if (error) {
+        reject(error)
+      } else if (response.statusCode === 200) {
+        let tracks: Track[] = [];
+        for (let item of body.items) {
+          const track = new Track(item.track.id, item.track.name, item.track.album.name, item.track.artists[0].name, new Date(item.added_at), item.track.uri);
+          tracks.push(track)
+        }
+        resolve(tracks)
+      } else {
+        reject(response)
+      }
+    })
+  })
+}
+
+/**
+ * Remove an array of tracks from a playlist
+ * @param {string} playlistId
+ * @param {Track[]} tracks
+ * @param {string} accessToken
+ * @returns {Promise<void>}
+ */
+export async function removeTracksFromPlaylist(playlistId: string, tracks: Track[], accessToken: string): Promise<void> {
+  let uriList: any = {tracks: []};
+  uriList.tracks = tracks.map((track) => {return {uri: track.uri}});
+
+  await Axios.delete(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`,  {
+    headers: {
+      'Authorization': 'Bearer ' + accessToken
+    },
+    data: uriList
+  });
 }
