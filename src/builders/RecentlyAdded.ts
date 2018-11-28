@@ -1,10 +1,5 @@
 import { Track } from '../Track';
-import {
-  addTracksToPlaylist,
-  getTracksInPlaylist,
-  getUserLastTracks,
-  getUserPlaylists, removeTracksFromPlaylist,
-} from '../Utils';
+import { SpotifyAPI } from '../SpotifyAPI';
 import { Playlist } from '../Playlist';
 
 /**
@@ -13,6 +8,7 @@ import { Playlist } from '../Playlist';
 export class RecentlyAdded {
   accessToken: string;
   private limit: number = 25;
+  spotify: SpotifyAPI = new SpotifyAPI();
 
   /**
    * Give the smart playlist an access token.
@@ -27,7 +23,7 @@ export class RecentlyAdded {
    * @returns {Promise<void>}
    */
   private async getUsersLastTracks() {
-    return await getUserLastTracks(this.accessToken);
+    return await this.spotify.getUserLastTracks(this.accessToken);
   }
 
   /**
@@ -35,7 +31,7 @@ export class RecentlyAdded {
    * @returns {Promise<Playlist>}
    */
   private async getRecentlyAddedPlaylist(): Promise<Playlist> {
-    const usersPlaylists = await getUserPlaylists(this.accessToken);
+    const usersPlaylists = await this.spotify.getUserPlaylists(this.accessToken);
     return usersPlaylists.find(playlist => playlist.name === 'Recently Added');
   }
 
@@ -46,7 +42,7 @@ export class RecentlyAdded {
    * @returns {Promise<Track[]>}
    */
   private async getTracksInRecentlyAddedPlaylist(playlistId: string): Promise<Track[]> {
-    const recentlyAddedTracks: Track[] = await getTracksInPlaylist(playlistId, this.accessToken);
+    const recentlyAddedTracks: Track[] = await this.spotify.getTracksInPlaylist(playlistId, this.accessToken);
     return recentlyAddedTracks.sort(((a, b) => {
       if (+a.added > +b.added) {
         return 1;
@@ -104,31 +100,18 @@ export class RecentlyAdded {
     const recentlyAddedPlaylist: Playlist = await this.getRecentlyAddedPlaylist();
     const recentlyAddedTracks: Track[] =
       await this.getTracksInRecentlyAddedPlaylist(recentlyAddedPlaylist.id);
-
-    // if (recentlyAddedTracks.length < this.limit) {
-    //  tracksToAdd = usersLastAddedSongs.splice(0, this.limit);
-    // } else {
-    //  usersLastAddedSongs.forEach((track, index) => {
-    //    if (+(track.added) > +(recentlyAddedTracks[0].added)) {
-    //      recentlyAddedTracks.unshift(usersLastAddedSongs[index]);
-    //      tracksToAdd.push(usersLastAddedSongs[index]);
-    //    }
-    //  });
-    // }
-    //
-    // if (recentlyAddedTracks.length > this.limit) {
-    //  tracksToRemove = recentlyAddedTracks.splice(
-    //    this.limit,
-    //    recentlyAddedTracks.length - this.limit,
-    //  );
-    // }
-
     const tracksToAdd: Track[] = this.getTracksToAdd(usersLastAddedSongs, recentlyAddedTracks);
     const tracksToRemove: Track[] = this.getTracksToRemove(tracksToAdd, recentlyAddedTracks);
 
     try {
-      await removeTracksFromPlaylist(recentlyAddedPlaylist.id, tracksToRemove, this.accessToken);
-      await addTracksToPlaylist(recentlyAddedPlaylist.id, tracksToAdd, this.accessToken);
+      await this.spotify.removeTracksFromPlaylist(
+        recentlyAddedPlaylist.id,
+        tracksToRemove,
+        this.accessToken);
+      await this.spotify.addTracksToPlaylist(
+        recentlyAddedPlaylist.id,
+        tracksToAdd,
+        this.accessToken);
     } catch (e) {
       console.error(e);
     }

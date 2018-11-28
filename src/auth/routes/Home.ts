@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { generateRandomString, saveTokenToFile } from '../../Utils';
+import { generateRandomString, writeToFile } from '../../Utils';
 import * as querystring from 'querystring';
 import * as request from 'request';
 import * as path from 'path';
@@ -20,6 +20,7 @@ function home(): Router {
 
   router.get('/login', (req: Request, res: Response) => {
     const state = generateRandomString(16);
+    console.debug(stateKey, state);
 
     res.cookie(stateKey, state);
 
@@ -80,7 +81,7 @@ function home(): Router {
             // store token to file
           if (access_token) {
             try {
-              await saveTokenToFile(refresh_token);
+              await writeToFile(refresh_token, 'refresh_token.txt');
             } catch (e) {
               console.error(e);
             }
