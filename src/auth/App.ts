@@ -3,10 +3,9 @@ import * as dotenv from 'dotenv';
 import * as express from 'express';
 import * as cors from 'cors';
 import * as cookieParser from 'cookie-parser';
-import { addRoutes } from './routes';
+import { addRoutes } from './Router';
 import * as bodyParser from 'body-parser';
-import * as path from 'path';
-//dotenv.config({ path: path.join(__dirname, '../../.env') });
+
 dotenv.load();
 let app = express();
 
