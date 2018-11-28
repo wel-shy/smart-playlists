@@ -20,8 +20,6 @@ function home(): Router {
 
   router.get('/login', (req: Request, res: Response) => {
     const state = generateRandomString(16);
-    console.debug(stateKey, state);
-
     res.cookie(stateKey, state);
 
     const scope: string = [
@@ -73,7 +71,7 @@ function home(): Router {
         error: Error,
         response: request.RequestResponse,
         body: any) => {
-        const redirectUrl: string = 'http://localhost:8888?';
+        const redirectUrl: string = `${process.env.HOST}?`;
         if (!error && response.statusCode === 200) {
           const access_token = body.access_token;
           const refresh_token = body.refresh_token;
