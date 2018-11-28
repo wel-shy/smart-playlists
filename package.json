@@ -2,9 +2,12 @@
   "name": "smart-playlists",
   "version": "0.0.1",
   "description": "Smart playlists for Spotify",
-  "main": "dist/index.js",
+  "main": "dist/App.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "auth": "node dist/auth/App.js",
+    "build": "npx tsc",
+    "execute": "node dist/App.js"
   },
   "repository": {
     "type": "git",
