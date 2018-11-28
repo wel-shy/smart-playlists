@@ -1,19 +1,14 @@
 import { describe } from 'mocha';
+import * as dotenv from 'dotenv';
 
-describe('api', () => {
+describe('App', () => {
   before(() => {
-  });
-
-  after(async () => {
+    dotenv.load();
   });
 
   /**
    * Import tests from files
    */
-  require('./modules/media');
-  require('./modules/home');
-  require('./modules/auth');
-  require('./modules/middleware');
-  require('./modules/user');
-  require('./modules/devices');
+  require('./modules/Spotify');
+  require('./modules/playlists/RecentlyAdded');
 });

@@ -12,7 +12,7 @@ export class SpotifyAPI {
    * @param {string} refreshToken
    * @returns {Promise<string>}
    */
-  fetchAuthToken(refreshToken: string): Promise<string> {
+  async fetchAuthToken(refreshToken: string): Promise<string> {
     const authOptions = {
       url: 'https://accounts.spotify.com/api/token',
       headers: {
