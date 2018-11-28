@@ -12,6 +12,6 @@ export class Track {
     this.album = album;
     this.artist = artist;
     this.added = added;
-    this.uri = uri
+    this.uri = uri;
   }
 }
