@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 import * as request from 'request';
-import { Track } from './track';
-import { Playlist } from './playlist';
+import { Track } from './Track';
+import { Playlist } from './Playlist';
 import axios from 'axios';
 
 const writeFile = promisify(fs.writeFile);

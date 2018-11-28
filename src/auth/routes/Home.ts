@@ -1,13 +1,12 @@
 import { Request, Response, Router } from 'express';
-import { generateRandomString, saveTokenToFile } from '../../utils';
+import { generateRandomString, saveTokenToFile } from '../../Utils';
 import * as querystring from 'querystring';
 import * as request from 'request';
 import * as path from 'path';
 
 /**
  * Get routes
- * @param  app Express.express
- * @return     Router
+ * @return Router
  */
 function home(): Router {
   const router = Router();

@@ -28,5 +28,5 @@ app.use(bodyParser.json());
 app = addRoutes(app);
 
 app.listen(process.env.PORT, () => {
-  console.log(`Listenting on ${process.env.PORT}`);
+  console.log(`Listening on ${process.env.PORT}`);
 });
