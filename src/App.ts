@@ -2,9 +2,12 @@ import * as dotenv from 'dotenv';
 import { getTextFromFile } from './Utils';
 import { RecentlyAdded } from './builders/RecentlyAdded';
 import { SpotifyAPI } from './SpotifyAPI';
+import * as path from 'path';
 
 // Load environment variables.
-dotenv.load();
+dotenv.config({
+  path: path.join(__dirname, '../.env'),
+});
 
 let refreshToken: string;
 let accessToken: string;
