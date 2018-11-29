@@ -42,7 +42,8 @@ export class RecentlyAdded {
    * @returns {Promise<Track[]>}
    */
   private async getTracksInRecentlyAddedPlaylist(playlistId: string): Promise<Track[]> {
-    const recentlyAddedTracks: Track[] = await this.spotify.getTracksInPlaylist(playlistId, this.accessToken);
+    const recentlyAddedTracks: Track[] =
+      await this.spotify.getTracksInPlaylist(playlistId, this.accessToken);
     return recentlyAddedTracks.sort(((a, b) => {
       if (+a.added > +b.added) {
         return 1;

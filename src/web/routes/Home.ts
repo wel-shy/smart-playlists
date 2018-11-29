@@ -83,9 +83,7 @@ function home(): Router {
             try {
               const spotifyUser = await spotify.getUserInfo(access_token);
               const user = new User(spotifyUser.email, spotifyUser.displayName, refresh_token);
-              user.save();
-
-              await writeToFile(refresh_token, 'refresh_token.txt');
+              await user.save();
             } catch (e) {
               console.error(e);
             }
