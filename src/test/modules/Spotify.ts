@@ -12,7 +12,7 @@ describe('Spotify API', () => {
   });
 
   describe('Authenticate', () => {
-    describe('Fetch an auth token from the Spotify API', () => {
+    describe('Fetch an web token from the Spotify API', () => {
       it('Should get a token from Spotify', (done) => {
         getTextFromFile('refresh_token.txt')
           .then((refreshToken) => {

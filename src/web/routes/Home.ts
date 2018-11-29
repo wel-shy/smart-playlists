@@ -3,6 +3,8 @@ import { generateRandomString, writeToFile } from '../../Utils';
 import * as querystring from 'querystring';
 import * as request from 'request';
 import * as path from 'path';
+import { SpotifyAPI } from '../../SpotifyAPI';
+import { User } from '../entities/User';
 
 /**
  * Get routes
@@ -10,8 +12,8 @@ import * as path from 'path';
  */
 function home(): Router {
   const router = Router();
-
   const stateKey = 'spotify_auth_state';
+  const spotify = new SpotifyAPI();
 
   // Serve static html
   router.get('/', (req: Request, res: Response) => {
@@ -79,6 +81,10 @@ function home(): Router {
             // store token to file
           if (access_token) {
             try {
+              const spotifyUser = await spotify.getUserInfo(access_token);
+              const user = new User(spotifyUser.email, spotifyUser.displayName, refresh_token);
+              user.save();
+
               await writeToFile(refresh_token, 'refresh_token.txt');
             } catch (e) {
               console.error(e);
@@ -97,32 +103,6 @@ function home(): Router {
         }
       });
     }
-  });
-
-  router.get('/refresh_token/:token', (req: Request, res: Response) => {
-    // requesting access token from refresh token
-    const refreshToken: string = req.query.refresh_token || req.params.token;
-    const authOptions = {
-      url: 'https://accounts.spotify.com/api/token',
-      headers: {
-        Authorization: `Basic ${(new Buffer(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`)
-          .toString('base64'))}`,
-      },
-      form: {
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      },
-      json: true,
-    };
-
-    request.post(authOptions, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const accessToken = body.access_token;
-        res.send({
-          access_token: accessToken,
-        });
-      }
-    });
   });
 
   return router;

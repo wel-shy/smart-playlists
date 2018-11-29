@@ -1,0 +1,39 @@
+# Download Docker image, Node.js running on Alpine
+FROM node:alpine
+
+
+# Make an app directory to hold the server files.
+RUN mkdir /app
+
+
+# Set the working directory to app.
+WORKDIR /app
+
+
+RUN mkdir data
+
+
+RUN npm install -g nodemon
+
+
+COPY ./package.json /app/package.json
+
+
+# Install npm packages.
+RUN npm install
+
+COPY .env /app/.env
+COPY tsconfig.json /app/tsconfig.json
+COPY src /app/src
+COPY index.html /app/index.html
+
+
+RUN npm run build
+
+
+# Expose port 80
+EXPOSE 8888
+
+
+# Start the server.
+CMD nodemon dist/web/App.js

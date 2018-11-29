@@ -41,6 +41,11 @@
     "cors": "^2.8.5",
     "dotenv": "^6.1.0",
     "express": "^4.16.4",
-    "request": "^2.88.0"
+    "mysql": "^2.16.0",
+    "reflect-metadata": "^0.1.12",
+    "request": "^2.88.0",
+    "sails-mysql": "^1.0.1",
+    "typeorm": "^0.2.9",
+    "waterline": "^0.13.6"
   }
 }
