@@ -74,7 +74,7 @@ function home(): Router {
         error: Error,
         response: request.RequestResponse,
         body: any) => {
-        const redirectUrl: string = `${process.env.HOST}?`;
+        const redirectUrl: string = 'http://localhost:8080?'; /*`${process.env.HOST}?`*/
         if (!error && response.statusCode === 200) {
           const access_token = body.access_token;
           const refresh_token = body.refresh_token;
