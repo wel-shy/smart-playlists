@@ -1,10 +1,11 @@
 import { Request, Response, Router } from 'express';
-import { generateRandomString, writeToFile } from '../../Utils';
+import { generateRandomString, generateToken } from '../../Utils';
 import * as querystring from 'querystring';
 import * as request from 'request';
 import * as path from 'path';
 import { SpotifyAPI } from '../../SpotifyAPI';
 import { User } from '../entities/User';
+import { UserController } from '../controllers/UserController';
 
 /**
  * Get routes
@@ -78,20 +79,38 @@ function home(): Router {
           const access_token = body.access_token;
           const refresh_token = body.refresh_token;
 
+          let authToken: string;
+          let user: User;
+
             // store token to file
           if (access_token) {
             try {
               const spotifyUser = await spotify.getUserInfo(access_token);
-              const user = new User(spotifyUser.email, spotifyUser.displayName, refresh_token);
-              await user.save();
+              const userController = new UserController();
+
+              user = new User(spotifyUser.email, spotifyUser.displayName, refresh_token);
+              const storedUser = await userController.getUserByEmail(user.email);
+
+              if (storedUser) {
+                user = storedUser;
+              } else {
+                await user.save();
+              }
+
+              authToken = generateToken(user);
+
             } catch (e) {
               console.error(e);
+              res.status(500);
+              return res.json({
+                error: e,
+              });
             }
           }
           res.redirect(redirectUrl +
               querystring.stringify({
-                access_token,
-                refresh_token,
+                authToken,
+                user: user.displayName,
               }));
         } else {
           res.redirect(redirectUrl +
