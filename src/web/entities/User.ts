@@ -28,5 +28,4 @@ export class User extends BaseEntity{
     this.displayName = displayName;
     this.refreshToken = refreshToken;
   }
-
 }

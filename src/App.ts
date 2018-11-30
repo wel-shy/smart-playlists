@@ -6,6 +6,7 @@ import { createConnection } from 'typeorm';
 import { dbOptions } from './web/config/ORM';
 import { UserController } from './web/controllers/UserController';
 import { User } from './web/entities/User';
+import {IBuilder} from "./builders/IBuilder";
 
 // Load environment variables.
 dotenv.config({
@@ -34,6 +35,25 @@ async function main() {
 
     connection.close();
   }).catch(error => console.log('TypeORM connection error: ', error));
+}
+
+async function getUsersPlaylistBuilders(user: User): Promise<IBuilder[]> {
+  return [];
+}
+
+async function exectuteBuilders(builders: IBuilder[], accessToken: string): Promise<void> {
+  const promises: Promise<void>[] = [];
+  builders.forEach((builder: IBuilder) => {
+    promises.push(builder.execute(accessToken));
+  });
+
+  Promise.all(promises)
+    .then(() => {
+      console.log('executed subs');
+    })
+    .catch((e) => {
+      console.error(e);
+    });
 }
 
 main();

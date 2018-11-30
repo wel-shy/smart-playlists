@@ -21,7 +21,6 @@ createConnection(dbOptions).then(async (connection) => {
 
   const userController = new UserController();
   const users = await userController.getUsers();
-  console.log(users);
 
   app.listen(process.env.PORT, () => {
     console.log(`Listening on ${process.env.PORT}`);

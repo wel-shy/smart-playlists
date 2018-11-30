@@ -1,11 +1,12 @@
 import { Track } from '../Track';
 import { SpotifyAPI } from '../SpotifyAPI';
 import { Playlist } from '../Playlist';
+import { IBuilder } from './IBuilder';
 
 /**
  * Create a recently added playlist
  */
-export class RecentlyAdded {
+export class RecentlyAdded implements IBuilder{
   accessToken: string;
   private limit: number = 25;
   spotify: SpotifyAPI = new SpotifyAPI();
