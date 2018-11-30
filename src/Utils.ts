@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { promisify } from 'util';
 import * as fs from 'fs';
-import {User} from "./web/entities/User";
+import { User } from './web/entities/User';
 import * as jwt from 'jsonwebtoken';
 
 const writeFile = promisify(fs.writeFile);

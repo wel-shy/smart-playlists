@@ -4,6 +4,7 @@ import * as cors from 'cors';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import { addRoutes } from '../Router';
+import { handleError } from '../middleware/ErrorHandler';
 
 export function getServer(): Express {
   let app = express();
@@ -24,6 +25,9 @@ export function getServer(): Express {
 
 // Add routes, pass websocket server to api router
   app = addRoutes(app);
+
+  // Add error handler after all routes are added.
+  app.use(handleError);
 
   return app;
 }

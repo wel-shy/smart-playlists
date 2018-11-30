@@ -36,4 +36,13 @@ export class UserController {
   async getUserByEmail(email: string): Promise<User> {
     return await getManager().getRepository(User).findOne({ email });
   }
+
+  /**
+   * Destroy a user
+   * @param {number} id
+   * @returns {Promise<void>}
+   */
+  async destroyUser(id: number): Promise<void> {
+    await getManager().getRepository(User).delete(id);
+  }
 }
