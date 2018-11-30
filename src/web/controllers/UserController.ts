@@ -43,6 +43,9 @@ export class UserController {
    * @returns {Promise<void>}
    */
   async destroyUser(id: number): Promise<void> {
-    await getManager().getRepository(User).delete(id);
+    const user: User = await this.getUser(id);
+    if (user) {
+      await user.remove();
+    }
   }
 }

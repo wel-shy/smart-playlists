@@ -11,7 +11,7 @@ import { UserController } from '../controllers/UserController';
  * Get routes
  * @return Router
  */
-function home(): Router {
+function homeRouter(): Router {
   const router = Router();
   const stateKey = 'spotify_auth_state';
   const spotify = new SpotifyAPI();
@@ -125,4 +125,4 @@ function home(): Router {
   return router;
 }
 
-export default home;
+export default homeRouter;

@@ -1,4 +1,4 @@
-import { BaseRouter } from './Base';
+import { BaseRouter } from './BaseRouter';
 import { NextFunction, Request, Response } from 'express';
 import { UserController } from '../controllers/UserController';
 import { User } from '../entities/User';
@@ -7,8 +7,6 @@ import { Methods } from '../../Methods';
 import { isAuthenticated } from '../middleware/Auth';
 
 export default class UserRouter extends BaseRouter {
-  userController: UserController;
-
   /**
    * Create the router:
    * Add middleware ensure user is authenticated.
@@ -16,8 +14,6 @@ export default class UserRouter extends BaseRouter {
    */
   constructor() {
     super();
-
-    this.userController = new UserController();
     this.addMiddleware(isAuthenticated);
     this.addRoute('/', Methods.DELETE, this.destroyUser);
   }
@@ -30,6 +26,7 @@ export default class UserRouter extends BaseRouter {
    * @returns {Promise<e.Response | void>}
    */
   async destroyUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    const userController = new UserController();
     let user: User;
     if (res.locals.error) {
       return next(new Error(`${res.locals.error}`));
@@ -37,7 +34,7 @@ export default class UserRouter extends BaseRouter {
 
     // Fetch the user.
     try {
-      user = await this.userController.getUser(res.locals.user.id);
+      user = await userController.getUser(res.locals.user.id);
 
       if (!user) {
         return next(new Error('404'));

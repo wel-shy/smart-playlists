@@ -1,28 +1,17 @@
 <template lang="pug">
   div.home
-    section.section.has-text-left(
-      v-if="!isLoggedIn"
-    )
-      div.container
-        h3.is-size-3 Let's get started
-        a.button.is-primary.is-rounded(
-          href="http://localhost:8888/login",
-          v-if="!isLoggedIn"
-        ) Login with Spotify
-    section.section(
-      v-else
-    )
+    section.section
       div.container.has-text-left
         div
           h3.is-size-3 Manage Your Account
         div
           button.button.is-primary.is-rounded.is-warning(
-            @click="logout()"
+            @click="logout"
           ) Logout
-          a.button.is-danger.is-rounded.delete-account Delete Account
-    section.section(
-      v-if="isLoggedIn"
-    )
+          a.button.is-danger.is-rounded.delete-account(
+            @click="deleteUser"
+          ) Delete Account
+    section.section
       div.container
         div.columns.is-mobile.subscription(
           v-for="(sub, index) in subscriptions"
@@ -42,8 +31,7 @@
 </template>
 
 <script>
-// @ is an alias to /src
-// import HelloWorld from '@/components/HelloWorld.vue';
+import axios from 'axios';
 
 export default {
   name: 'home',
@@ -51,7 +39,6 @@ export default {
   components: {},
   data() {
     return {
-      isLoggedIn: false,
       authToken: null,
       name: null,
       subscriptions: [
@@ -73,22 +60,35 @@ export default {
       this.subscriptions[index].active = !this.subscriptions[index].active;
     },
     logout() {
-      this.isLoggedIn = false;
+      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      this.$emit('logged-out');
+    },
+    async deleteUser() {
+      const url = 'http://localhost:8888/api/user/';
+
+      if (!confirm('Are you sure you wish to delete your Smart Playlists account?')) {
+        return;
+      }
+
+      try {
+        await axios.delete(url, { headers: { 'x-access-token': this.getToken() } });
+      } catch (e) {
+        console.log(e);
+        alert('Account could not be deleted');
+      }
+
+      this.logout();
+    },
+    getToken() {
+      const value = `; ${document.cookie}`;
+      const parts = value.split('; authToken=');
+      if (parts.length === 2) {
+        return parts.pop().split(';').shift();
+      }
+      return null;
     },
   },
   mounted() {
-    const urlString = window.location.href;
-    const url = new URL(urlString);
-    const authToken = url.searchParams.get('authToken');
-    const userName = url.searchParams.get('user');
-
-    if (authToken) {
-      this.isLoggedIn = true;
-      this.accessToken = authToken;
-    }
-    if (userName) {
-      this.name = userName;
-    }
   },
 };
 </script>
