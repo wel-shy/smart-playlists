@@ -4,9 +4,9 @@ import { SpotifyAPI } from './SpotifyAPI';
 import * as path from 'path';
 import { createConnection } from 'typeorm';
 import { dbOptions } from './web/config/ORM';
-import { UserController } from './web/controllers/UserController';
+import { UserRepository } from './web/repositories/UserRepository';
 import { User } from './web/entities/User';
-import {IBuilder} from "./builders/IBuilder";
+import { IBuilder } from './builders/IBuilder';
 
 // Load environment variables.
 dotenv.config({
@@ -21,8 +21,8 @@ async function main() {
   createConnection(dbOptions).then(async (connection) => {
     console.log('Connected to DB', connection.isConnected);
 
-    userController = new UserController();
-    const users = await userController.getUsers();
+    userController = new UserRepository();
+    const users = await userController.getAll();
 
     // For each user, update recently added playlist.
     users.forEach(async (user: User) => {

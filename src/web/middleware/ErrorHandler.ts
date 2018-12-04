@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { Reply } from '../reply';
+import { Reply } from '../Reply';
 
 export const handleError: express.ErrorRequestHandler = (err: Error, req: express.Request,
                                                          res: express.Response,

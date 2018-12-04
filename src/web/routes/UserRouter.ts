@@ -1,6 +1,6 @@
 import { BaseRouter } from './BaseRouter';
 import { NextFunction, Request, Response } from 'express';
-import { UserController } from '../controllers/UserController';
+import { UserRepository } from '../repositories/UserRepository';
 import { User } from '../entities/User';
 import { Reply } from '../Reply';
 import { Methods } from '../../Methods';
@@ -26,7 +26,7 @@ export default class UserRouter extends BaseRouter {
    * @returns {Promise<e.Response | void>}
    */
   async destroyUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-    const userController = new UserController();
+    const userController = new UserRepository();
     let user: User;
     if (res.locals.error) {
       return next(new Error(`${res.locals.error}`));
@@ -34,7 +34,7 @@ export default class UserRouter extends BaseRouter {
 
     // Fetch the user.
     try {
-      user = await userController.getUser(res.locals.user.id);
+      user = await userController.get(res.locals.user.id);
 
       if (!user) {
         return next(new Error('404'));

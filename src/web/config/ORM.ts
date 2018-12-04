@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 import { ConnectionOptions } from 'typeorm';
 import { User } from '../entities/User';
+import { Subscription } from '../entities/Subscription';
+import { Builder } from '../entities/Builder';
 
 export const dbOptions: ConnectionOptions = {
   type: 'mysql',
@@ -11,6 +13,8 @@ export const dbOptions: ConnectionOptions = {
   database: 'smartlist',
   entities: [
     User,
+    Subscription,
+    Builder,
   ],
   synchronize: true,
 };

@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Subscription } from './Subscription';
 
 // Maps to a table.
 @Entity('user')
@@ -21,6 +22,9 @@ export class User extends BaseEntity{
     length: 255,
   })
   refreshToken: string;
+
+  @OneToMany(type => Subscription, sub => sub.user)
+  subscriptions: Subscription[];
 
   constructor(email: string, displayName: string, refreshToken: string) {
     super();

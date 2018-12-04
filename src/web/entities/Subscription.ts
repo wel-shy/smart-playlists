@@ -1,23 +1,21 @@
-import { BaseEntity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './User';
+import { Builder } from './Builder';
 
+@Entity('subscription')
 export class Subscription extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    length: 255,
-    unique: true,
-  })
-  name: string;
+  @ManyToOne(type => User, user => user.id)
+  user: User;
 
-  @Column({
-    length: 255,
-  })
-  userId: string;
+  @ManyToOne(type => Builder, builder => builder.id)
+  builder: Builder;
 
-  constructor(name: string, userId: string) {
+  constructor(user: User, builder: Builder) {
     super();
-    this.name = name;
-    this.userId = userId;
+    this.user = user;
+    this.builder = builder;
   }
 }

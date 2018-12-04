@@ -5,7 +5,7 @@ import * as request from 'request';
 import * as path from 'path';
 import { SpotifyAPI } from '../../SpotifyAPI';
 import { User } from '../entities/User';
-import { UserController } from '../controllers/UserController';
+import { UserRepository } from '../repositories/UserRepository';
 
 /**
  * Get routes
@@ -86,10 +86,10 @@ function homeRouter(): Router {
           if (access_token) {
             try {
               const spotifyUser = await spotify.getUserInfo(access_token);
-              const userController = new UserController();
+              const userRepository = new UserRepository();
 
               user = new User(spotifyUser.email, spotifyUser.displayName, refresh_token);
-              const storedUser = await userController.getUserByEmail(user.email);
+              const storedUser = await userRepository.getUserByEmail(user.email);
 
               if (storedUser) {
                 user = storedUser;

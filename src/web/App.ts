@@ -4,8 +4,9 @@ import * as dotenv from 'dotenv';
 import { createConnection } from 'typeorm';
 import { dbOptions } from './config/ORM';
 import * as path from 'path';
-import { UserController } from './controllers/UserController';
+import { UserRepository } from './repositories/UserRepository';
 import { getServer } from './config/Config';
+import { SubscriptionRepository } from './repositories/SubscriptionRepository';
 
 dotenv.config(
   {
@@ -19,8 +20,14 @@ const app = getServer();
 createConnection(dbOptions).then(async (connection) => {
   console.log('Connected to DB', connection.isConnected);
 
-  const userController = new UserController();
-  const users = await userController.getUsers();
+  const userController = new UserRepository();
+  const users = await userController.getAll();
+
+  console.log(users);
+
+  const subscriptionController = new SubscriptionRepository();
+  const subs = await subscriptionController.getAll();
+  console.log(subs);
 
   app.listen(process.env.PORT, () => {
     console.log(`Listening on ${process.env.PORT}`);
