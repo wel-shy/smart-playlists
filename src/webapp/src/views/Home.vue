@@ -20,13 +20,15 @@
             h4.is-size-4 {{playlist.name}}
             p {{playlist.description}}
           div.column.is-4.has-text-right
-            button.button.is-primary.is-rounded.sub-button(
+            button(
               v-if="playlist.active",
-              @click="toggleActive(index)"
+              @click="toggleActive(index)",
+              :class="[{'is-loading': playlist.isLoading}, 'button', 'is-primary', 'is-rounded', 'sub-button']"
             ) Active
             button.button.is-rounded.sub-button(
               v-else,
-              @click="toggleActive(index)"
+              @click="toggleActive(index)",
+            :class="[{'is-loading': playlist.isLoading}, 'button', 'is-rounded', 'sub-button']"
             ) Inactive
 </template>
 
@@ -49,6 +51,7 @@ export default {
   methods: {
     async toggleActive(index) {
       let response;
+      this.playlists[index].isLoading = true;
 
       if (!this.playlists[index].active) {
         const url = 'http://localhost:8888/api/subs/';
@@ -61,12 +64,14 @@ export default {
           });
         } catch (e) {
           console.log(e);
+          this.playlists[index].isLoading = false;
         }
 
         if (response.status !== 200) {
+          this.playlists[index].isLoading = false;
           return;
         }
-
+        this.playlists[index].isLoading = false;
         this.playlists[index].active = true;
       } else {
         const url = `http://localhost:8888/api/subs/${this.playlists[index].id}`;
@@ -80,12 +85,14 @@ export default {
             });
         } catch (e) {
           console.log(e);
+          this.playlists[index].isLoading = false;
         }
 
         if (response.status !== 200) {
+          this.playlists[index].isLoading = false;
           return;
         }
-
+        this.playlists[index].isLoading = false;
         this.playlists[index].active = false;
       }
     },
