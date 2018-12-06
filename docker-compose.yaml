@@ -3,7 +3,7 @@ services:
   web:
     build: .
     ports:
-      - 8888:8888
+      - 5555:5555
     volumes:
       - "./src:/app/src"
       - "./.env:/app/.env"
