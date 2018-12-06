@@ -25,7 +25,6 @@ RUN npm install
 COPY .env /app/.env
 COPY tsconfig.json /app/tsconfig.json
 COPY src /app/src
-COPY index.html /app/index.html
 COPY ormconfig.json /app/ormconfig.json
 
 

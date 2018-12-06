@@ -16,11 +16,6 @@ function homeRouter(): Router {
   const stateKey = 'spotify_auth_state';
   const spotify = new SpotifyAPI();
 
-  // Serve static html
-  router.get('/', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../../../index.html'));
-  });
-
   router.get('/login', (req: Request, res: Response) => {
     const state = generateRandomString(16);
     res.cookie(stateKey, state);
