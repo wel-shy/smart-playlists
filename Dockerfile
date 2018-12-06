@@ -32,7 +32,7 @@ RUN npm run build
 
 
 # Expose port 80
-EXPOSE 8888
+EXPOSE 5555
 
 
 # Start the server.
