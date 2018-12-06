@@ -191,4 +191,7 @@ export default {
     top: 50%;
     transform: translateY(-50%);
   }
+  .home {
+    min-height: 50vh;
+  }
 </style>

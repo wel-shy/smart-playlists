@@ -1,7 +1,7 @@
 <template lang="pug">
   div#app
     div.container-fluid
-      section.hero.is-light.is-medium
+      section.hero.is-light.header
         div.hero-body
           div.container
             h1.title Smart Playlists
@@ -13,17 +13,20 @@
       v-else,
       v-on:logged-out="isLoggedIn = false"
     )
+    FooterBar
 </template>
 
 <script>
 import Login from './views/Login.vue';
 import Home from './views/Home.vue';
+import FooterBar from './views/FooterBar.vue';
 
 export default {
   name: 'App',
   components: {
     Login,
     Home,
+    FooterBar,
   },
   data() {
     return {
@@ -77,14 +80,8 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+  .header {
+    min-height: 25vh;
+    padding-top: 5%;
   }
-}
 </style>
