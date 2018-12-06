@@ -1,7 +1,9 @@
 import { BaseRouter } from './BaseRouter';
 import { NextFunction, Request, Response } from 'express';
 import { UserRepository } from '../repositories/UserRepository';
+import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { User } from '../entities/User';
+import { Subscription } from '../entities/Subscription';
 import { Reply } from '../Reply';
 import { Methods } from '../../Methods';
 import { isAuthenticated } from '../middleware/Auth';
@@ -27,7 +29,9 @@ export default class UserRouter extends BaseRouter {
    */
   async destroyUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     const userController = new UserRepository();
+    const subscriptionRepository = new SubscriptionRepository();
     let user: User;
+    let subscriptions: Subscription[];
     if (res.locals.error) {
       return next(new Error(`${res.locals.error}`));
     }
@@ -35,10 +39,13 @@ export default class UserRouter extends BaseRouter {
     // Fetch the user.
     try {
       user = await userController.get(res.locals.user.id);
-
       if (!user) {
         return next(new Error('404'));
       }
+      subscriptions = await subscriptionRepository.getUserSubscriptions(user);
+      subscriptions.forEach(async (sub) => {
+        await sub.remove();
+      });
 
       // Delete user.
       await user.remove();
