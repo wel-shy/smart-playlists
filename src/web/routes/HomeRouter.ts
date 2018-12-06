@@ -69,7 +69,7 @@ function homeRouter(): Router {
         error: Error,
         response: request.RequestResponse,
         body: any) => {
-        const redirectUrl: string = 'http://localhost:8080?'; /*`${process.env.HOST}?`*/
+        const redirectUrl: string = 'https://smart-lists.dwelsh.uk?'; /*`${process.env.HOST}?`*/
         if (!error && response.statusCode === 200) {
           const access_token = body.access_token;
           const refresh_token = body.refresh_token;
