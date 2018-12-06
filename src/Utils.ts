@@ -4,7 +4,6 @@ import * as fs from 'fs';
 import { User } from './web/entities/User';
 import * as jwt from 'jsonwebtoken';
 
-const writeFile = promisify(fs.writeFile);
 const readFile = promisify(fs.readFile);
 
 /**
@@ -23,17 +22,6 @@ export function generateRandomString(length: number): string {
   }
 
   return text;
-}
-
-/**
- * Write a message to a file.
- * @param {string} message
- * @param {string} fileName
- * @returns {Promise<void>}
- */
-export async function writeToFile(message: string, fileName: string): Promise<void> {
-  const filePath = path.join(__dirname, `/../data/${fileName}`);
-  await writeFile(filePath, message);
 }
 
 /**

@@ -1,21 +1,29 @@
-import { BaseEntity, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './User';
-import { Builder } from './Builder';
+import { Playlist } from './Playlist';
 
 @Entity('subscription')
 export class Subscription extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(type => User, user => user.id)
+  @Column({
+    type: 'number',
+    name: 'userId',
+  })
+  @ManyToOne(type => User, user => user.subscriptions)
   user: User;
 
-  @ManyToOne(type => Builder, builder => builder.id)
-  builder: Builder;
+  @Column({
+    type: 'number',
+    name: 'playlistId',
+  })
+  @ManyToOne(type => Playlist, playlist => playlist.subscriptions)
+  playlist: Playlist;
 
-  constructor(user: User, builder: Builder) {
+  constructor(user: User, playlist: Playlist) {
     super();
     this.user = user;
-    this.builder = builder;
+    this.playlist = playlist;
   }
 }

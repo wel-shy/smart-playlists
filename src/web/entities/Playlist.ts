@@ -1,8 +1,8 @@
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Subscription } from './Subscription';
 
-@Entity('builder')
-export class Builder extends BaseEntity {
+@Entity('playlist')
+export class Playlist extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -12,7 +12,10 @@ export class Builder extends BaseEntity {
   })
   name: string;
 
-  @OneToMany(type => Subscription, sub => sub.builder)
+  @Column('text')
+  description: string;
+
+  @OneToMany(type => Subscription, subscription => subscription.playlist)
   subscriptions: Subscription[];
 
   constructor(name: string) {
@@ -20,3 +23,4 @@ export class Builder extends BaseEntity {
     this.name = name;
   }
 }
+

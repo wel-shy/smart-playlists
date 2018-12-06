@@ -10,18 +10,18 @@
           ) Logout
           a.button.is-danger.is-rounded.delete-account(
             @click="deleteUser"
-          ) Delete Account
+          ) {{buttonText}}
     section.section
       div.container
         div.columns.is-mobile.subscription(
-          v-for="(sub, index) in subscriptions"
+          v-for="(playlist, index) in playlists"
         )
           div.column.is-8.has-text-left
-            h4.is-size-4 {{sub.name}}
-            p {{sub.desc}}
+            h4.is-size-4 {{playlist.name}}
+            p {{playlist.description}}
           div.column.is-4.has-text-right
             button.button.is-primary.is-rounded.sub-button(
-              v-if="sub.active",
+              v-if="playlist.active",
               @click="toggleActive(index)"
             ) Active
             button.button.is-rounded.sub-button(
@@ -41,32 +41,72 @@ export default {
     return {
       authToken: null,
       name: null,
-      subscriptions: [
-        {
-          name: 'Recently Added',
-          desc: 'Create a playlist for your most recently added songs.',
-          active: true,
-        },
-        {
-          name: 'Top 25',
-          desc: 'Your top 25 most played songs.',
-          active: false,
-        },
-      ],
+      buttonText: 'Delete Account',
+      awaitingConfirm: false,
+      playlists: [],
     };
   },
   methods: {
-    toggleActive(index) {
-      this.subscriptions[index].active = !this.subscriptions[index].active;
+    async toggleActive(index) {
+      let response;
+
+      if (!this.playlists[index].active) {
+        const url = 'http://localhost:8888/api/subs/';
+        try {
+          response = await axios.post(url, {
+            playlistId: this.playlists[index].id,
+          },
+          {
+            headers: { 'x-access-token': this.getToken() },
+          });
+        } catch (e) {
+          console.log(e);
+        }
+
+        if (response.status !== 200) {
+          return;
+        }
+
+        this.playlists[index].active = true;
+      } else {
+        const url = `http://localhost:8888/api/subs/${this.playlists[index].id}`;
+
+        try {
+          response = await axios.delete(url,
+            {
+              headers: {
+                'x-access-token': this.getToken(),
+              },
+            });
+        } catch (e) {
+          console.log(e);
+        }
+
+        if (response.status !== 200) {
+          return;
+        }
+
+        this.playlists[index].active = false;
+      }
     },
     logout() {
       document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       this.$emit('logged-out');
     },
+    setConfirmDelete() {
+      this.awaitingConfirm = true;
+      this.buttonText = 'Click to confirm';
+
+      setTimeout(() => {
+        this.awaitingConfirm = false;
+        this.buttonText = 'Delete Account';
+      }, 5000);
+    },
     async deleteUser() {
       const url = 'http://localhost:8888/api/user/';
 
-      if (!confirm('Are you sure you wish to delete your Smart Playlists account?')) {
+      if (!this.awaitingConfirm) {
+        this.setConfirmDelete();
         return;
       }
 
@@ -88,7 +128,44 @@ export default {
       return null;
     },
   },
-  mounted() {
+  async mounted() {
+    let url = 'http://localhost:8888/api/playlists/';
+    let response;
+    let playlists;
+
+    try {
+      response = await axios.get(url);
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (response.status === 200) {
+      playlists = response.data.payload;
+    }
+
+    url = 'http://localhost:8888/api/subs/';
+    try {
+      response = await axios.get(url, { headers: { 'x-access-token': this.getToken() } });
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (response.status !== 200) {
+      return;
+    }
+
+    const subs = response.data.payload;
+    const playlistIds = subs.map(sub => sub.playlist);
+
+    playlistIds.forEach((playlistId) => {
+      playlists.forEach((playlist, index) => {
+        if (playlistId === playlist.id) {
+          playlists[index].active = true;
+        }
+      });
+    });
+
+    this.playlists = playlists;
   },
 };
 </script>

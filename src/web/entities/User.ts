@@ -23,7 +23,7 @@ export class User extends BaseEntity{
   })
   refreshToken: string;
 
-  @OneToMany(type => Subscription, sub => sub.user)
+  @OneToMany(type => Subscription, subscription => subscription.user)
   subscriptions: Subscription[];
 
   constructor(email: string, displayName: string, refreshToken: string) {

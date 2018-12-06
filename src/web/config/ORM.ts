@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { ConnectionOptions } from 'typeorm';
 import { User } from '../entities/User';
 import { Subscription } from '../entities/Subscription';
-import { Builder } from '../entities/Builder';
+import { Playlist } from '../entities/Playlist';
 
 export const dbOptions: ConnectionOptions = {
   type: 'mysql',
@@ -14,7 +14,7 @@ export const dbOptions: ConnectionOptions = {
   entities: [
     User,
     Subscription,
-    Builder,
+    Playlist,
   ],
   synchronize: true,
 };

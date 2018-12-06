@@ -9,15 +9,21 @@ export class SubscriptionRepository extends GenericRepository<Subscription>{
   }
 
   async getUserSubscriptions(user: User): Promise<Subscription[]> {
-    const userWithRelations: User = await getManager().getRepository(User).findOne({
+    const userWithRelations: User = await getManager().getRepository(User).findOne(user.id, {
       relations: ['subscriptions'],
-      where: { id: user.id },
     });
+
+    console.log(userWithRelations);
 
     if (userWithRelations) {
       return userWithRelations.subscriptions;
     }
 
     return [];
+  }
+
+  async getMany(ids: number[]): Promise<Subscription[]> {
+    const subs: Subscription[] = await getManager().getRepository(Subscription).findByIds(ids);
+    return subs;
   }
 }
