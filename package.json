@@ -1,11 +1,11 @@
 {
   "name": "smart-playlists",
-  "version": "0.0.1",
+  "version": "0.2.2",
   "description": "Smart playlists for Spotify",
   "main": "dist/App.js",
   "scripts": {
     "test": "nyc mocha dist/test/test.js --exit",
-    "auth": "node dist/auth/App.js",
+    "web": "node dist/web/App.js",
     "build": "npx tsc",
     "execute": "node dist/App.js"
   },

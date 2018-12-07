@@ -1,9 +1,10 @@
 import { describe } from 'mocha';
 import { SpotifyAPI } from '../../SpotifyAPI';
 import { getTextFromFile } from '../../Utils';
-import { expect, assert } from 'chai';
+import { expect } from 'chai';
 import { Playlist } from '../../Playlist';
 import { Track } from '../../Track';
+import { SpotifyUser } from '../../SpotifyUser';
 
 describe('Spotify API', () => {
   let spotify: SpotifyAPI;
@@ -27,12 +28,34 @@ describe('Spotify API', () => {
     });
   });
 
-  describe('Tracks and Playlists', () => {
+  describe('User', () => {
     let refreshToken: string;
     let accessToken: string;
     before(async () => {
       refreshToken = await getTextFromFile('refresh_token.txt');
       accessToken = await spotify.fetchAuthToken(refreshToken);
+    });
+
+    describe('Get the users profile', () => {
+      it('Should return the users details', (done) => {
+        spotify.getUserInfo(accessToken).then((user: SpotifyUser) => {
+          expect(user.spotifyId).not.equal(null);
+          expect(user.displayName).not.equal(null);
+          expect(user.email).not.equal(null);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('Tracks and Playlists', () => {
+    let refreshToken: string;
+    let accessToken: string;
+    let user: SpotifyUser;
+    before(async () => {
+      refreshToken = await getTextFromFile('refresh_token.txt');
+      accessToken = await spotify.fetchAuthToken(refreshToken);
+      user = await spotify.getUserInfo(accessToken);
     });
 
     describe('Fetch a users playlists', () => {
@@ -50,6 +73,21 @@ describe('Spotify API', () => {
         spotify.getUserLastTracks(accessToken)
           .then((tracks: Track[]) => {
             expect(tracks.length).to.be.greaterThan(0);
+            done();
+          });
+      });
+    });
+
+    describe('Create a playlist', () => {
+      it('Should create a playlist', (done) => {
+        spotify.createPlaylist(
+          'Test Playlist',
+          'This is a test playlist',
+          user.spotifyId,
+          accessToken,
+        )
+          .then((id) => {
+            expect(id).not.equal(null);
             done();
           });
       });

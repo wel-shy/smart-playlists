@@ -220,7 +220,34 @@ export class SpotifyAPI {
 
     const userName = response.data.display_name;
     const userEmail = response.data.email;
+    const id = response.data.id;
 
-    return new SpotifyUser(userName, userEmail);
+    return new SpotifyUser(userName, userEmail, id);
+  }
+
+  /**
+   * Create a playlist.
+   * @param {string} name
+   * @param {string} description
+   * @param userId User id.
+   * @param {string} accessToken
+   * @returns {Promise<string>}
+   */
+  async createPlaylist(name: string, description: string, userId: string, accessToken: string):
+    Promise<Playlist> {
+    const response = await axios.post(
+      `https://api.spotify.com/v1/users/${userId}/playlists`,
+      {
+        name,
+        description,
+        public: false,
+        collaborative: false,
+      },
+      { headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      });
+
+    return new Playlist(response.data.id, response.data.name, response.data.uri);
   }
 }

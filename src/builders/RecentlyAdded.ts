@@ -1,12 +1,15 @@
 import { Track } from '../Track';
 import { SpotifyAPI } from '../SpotifyAPI';
 import { Playlist } from '../Playlist';
-import { IBuilder } from './IBuilder';
+import { BasePlaylistBuilder } from './BasePlaylistBuilder';
+import { SpotifyUser } from '../SpotifyUser';
 
 /**
  * Create a recently added playlist
+ * Create a new instance of this object through the PlaylistBuilderFactory.
+ * Use Prototype.PlaylistBuilderFactory.getPlaylistBuilder('RecentlyAdded');
  */
-export class RecentlyAdded extends IBuilder{
+export class RecentlyAdded extends BasePlaylistBuilder{
   private limit: number = 25;
   spotify: SpotifyAPI = new SpotifyAPI();
 
@@ -57,7 +60,7 @@ export class RecentlyAdded extends IBuilder{
     const tracksToAdd: Track[] = [];
 
     if (recentlyAdded.length < this.limit) {
-      return lastAdded.splice(0, this.limit);
+      return lastAdded.reverse().splice(0, this.limit);
     }
 
     lastAdded.forEach((track, index) => {
@@ -89,8 +92,20 @@ export class RecentlyAdded extends IBuilder{
    * @returns {Promise<void>}
    */
   async execute(): Promise<void> {
+    const spotifyUser: SpotifyUser = await this.spotify.getUserInfo(this.accessToken);
     const usersLastAddedSongs: Track[] = (await this.getUsersLastTracks()).reverse();
-    const recentlyAddedPlaylist: Playlist = await this.getRecentlyAddedPlaylist();
+    let recentlyAddedPlaylist: Playlist = await this.getRecentlyAddedPlaylist();
+
+    if (!recentlyAddedPlaylist) {
+      recentlyAddedPlaylist = await this.spotify.createPlaylist(
+        'Recently Added',
+        'Your top 25 most recently saved songs. ' +
+        'Manage your subscription at https://smart-lists.dwelsh.uk',
+        spotifyUser.spotifyId,
+        this.accessToken,
+      );
+    }
+
     const recentlyAddedTracks: Track[] =
       await this.getTracksInRecentlyAddedPlaylist(recentlyAddedPlaylist.id);
     const tracksToAdd: Track[] = this.getTracksToAdd(usersLastAddedSongs, recentlyAddedTracks);
@@ -119,6 +134,11 @@ export class RecentlyAdded extends IBuilder{
   }
 }
 
+/**
+ * Default function must return an instance of the class.
+ * This is to allow the PlaylistBuilderFactory to initialise.
+ * @returns {RecentlyAdded}
+ */
 export default function getInstance(): RecentlyAdded {
   return new RecentlyAdded();
 }

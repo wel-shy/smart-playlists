@@ -2,7 +2,6 @@ import { Request, Response, Router } from 'express';
 import { generateRandomString, generateToken } from '../../Utils';
 import * as querystring from 'querystring';
 import * as request from 'request';
-import * as path from 'path';
 import { SpotifyAPI } from '../../SpotifyAPI';
 import { User } from '../entities/User';
 import { UserRepository } from '../repositories/UserRepository';
