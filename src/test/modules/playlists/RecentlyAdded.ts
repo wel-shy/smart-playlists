@@ -1,5 +1,5 @@
 import { describe } from 'mocha';
-import { RecentlyAdded } from '../../../builders/RecentlyAdded';
+import  RecentlyAdded  from '../../../builders/RecentlyAdded';
 import { getTextFromFile } from '../../../Utils';
 import { SpotifyAPI } from '../../../SpotifyAPI';
 
@@ -12,10 +12,10 @@ describe('Recently Added', () => {
     accessToken = await spotify.fetchAuthToken(refreshToken);
   });
 
-  it('Should execute',  (done) => {
-    const recentlyAdded: RecentlyAdded = new RecentlyAdded(accessToken);
-    recentlyAdded.execute().then(() => {
-      done();
-    });
-  });
+  //it('Should execute',  (done) => {
+  //  const recentlyAdded: RecentlyAdded = new RecentlyAdded(accessToken);
+  //  recentlyAdded.execute().then(() => {
+  //    done();
+  //  });
+  //});
 });

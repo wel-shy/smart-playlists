@@ -6,18 +6,9 @@ import { IBuilder } from './IBuilder';
 /**
  * Create a recently added playlist
  */
-export class RecentlyAdded implements IBuilder{
-  accessToken: string;
+export class RecentlyAdded extends IBuilder{
   private limit: number = 25;
   spotify: SpotifyAPI = new SpotifyAPI();
-
-  /**
-   * Give the smart playlist an access token.
-   * @param {string} accessToken
-   */
-  constructor(accessToken: string) {
-    this.accessToken = accessToken;
-  }
 
   /**
    * Get the users last added tracks.
@@ -118,4 +109,16 @@ export class RecentlyAdded implements IBuilder{
       console.error(e);
     }
   }
+
+  toString(): string {
+    return 'Recently Added';
+  }
+
+  getInstance(): RecentlyAdded {
+    return new RecentlyAdded();
+  }
+}
+
+export default function getInstance(): RecentlyAdded {
+  return new RecentlyAdded();
 }

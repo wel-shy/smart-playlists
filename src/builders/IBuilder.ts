@@ -1,7 +1,18 @@
 /**
  * Playlist interface
  */
-export interface IBuilder {
+export abstract class IBuilder {
+  accessToken: string;
+
   // All builders must have an execute function.
-  execute(accessToken: string): Promise<void>;
+  abstract execute(): Promise<void>;
+  abstract getInstance(): IBuilder;
+
+  /**
+   * Set the access token
+   * @param {string} accessToken
+   */
+  setAccessToken(accessToken: string) {
+    this.accessToken = accessToken;
+  }
 }

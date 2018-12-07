@@ -13,8 +13,6 @@ export class SubscriptionRepository extends GenericRepository<Subscription>{
       relations: ['subscriptions'],
     });
 
-    console.log(userWithRelations);
-
     if (userWithRelations) {
       return userWithRelations.subscriptions;
     }
