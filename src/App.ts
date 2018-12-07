@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 dotenv.config({
-  path: path.join(__dirname, '../.env'),
+  path: path.join(__dirname, '../exec.env'),
 });
 
 import { SpotifyAPI } from './SpotifyAPI';
