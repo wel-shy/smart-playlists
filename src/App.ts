@@ -22,17 +22,37 @@ const readdir = promisify(fs.readdir);
 
 const spotify: SpotifyAPI = new SpotifyAPI();
 const playlistBuilders: Map<string, IBuilder> = new Map<string, IBuilder>();
-let userController;
+let users: User[];
 
 async function main() {
   // Create a connection to the database.
   createConnection(dbOptions).then(async (connection) => {
     console.log('Connected to DB', connection.isConnected);
+    const userSubPromises: Promise<Subscription[]>[] = [];
+    const playlists: Playlist[] = await (new GenericRepository<Playlist>(Playlist)).getAll();
+    let allSubscriptions: Subscription[][];
 
     // Get all users and playlists.
-    userController = new UserRepository();
-    const users = await userController.getAll();
-    const playlists: Playlist[] = await (new GenericRepository<Playlist>(Playlist)).getAll();
+    users = await (new UserRepository()).getAll();
+
+    // Get a list of sub queries.
+    users.forEach((user) => {
+      userSubPromises.push(getUsersSubscriptions(user));
+    });
+    try {
+      allSubscriptions = await Promise.all(userSubPromises);
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Attach users subscriptions to each user.
+    allSubscriptions.forEach((subs, index) => {
+      users[index].subscriptions = subs;
+      console.log(users[index]);
+    });
+
+    // Close the database connection.
+    connection.close();
 
     // Get all builders from file.
     await initialisePlaylistBuilders();
@@ -43,24 +63,22 @@ async function main() {
       executors.set(playlist.id, playlistBuilders.get(playlist.name.split(' ').join('')));
     });
 
-    // For each user, update recently added playlist.
+    // Get a list of executors for each user.
     users.forEach(async (user: User) => {
       const userExecutors: Promise<void>[] = [];
       const accessToken = await spotify.fetchAuthToken(user.refreshToken);
-      const userSubs = await getUsersSubscriptions(user);
-
-      userSubs.forEach((sub) => {
+      user.subscriptions.forEach((sub) => {
         const playlistBuilder: IBuilder =
           executors.get(parseInt(`${sub.playlist}`, 10)).getInstance();
         playlistBuilder.setAccessToken(accessToken);
         userExecutors.push(playlistBuilder.execute());
-        console.log(`Executing: ${executors.get(parseInt(`${sub.playlist}`, 10)).toString()}, for ${user.email}`);
+        console.log(
+          `Executing: ${executors.get(parseInt(`${sub.playlist}`, 10))
+            .toString()}, for ${user.email}`);
       });
 
       await Promise.all(userExecutors);
     });
-
-    // connection.close();
   }).catch(error => console.log('TypeORM connection error: ', error));
 }
 
@@ -70,7 +88,14 @@ async function main() {
  * @returns {Promise<Subscription[]>}
  */
 async function getUsersSubscriptions(user: User): Promise<Subscription[]> {
-  return await (new SubscriptionRepository()).getUserSubscriptions(user);
+  return new Promise<Subscription[]>((async (resolve, reject) => {
+    try {
+      const subs: Subscription[] = await (new SubscriptionRepository()).getUserSubscriptions(user);
+      resolve(subs);
+    } catch (e) {
+      reject(e);
+    }
+  }));
 }
 
 /**
