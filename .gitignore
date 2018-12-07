@@ -4,3 +4,4 @@ node_modules/
 dist/
 .idea/
 .nyc_output
+.exec.env
