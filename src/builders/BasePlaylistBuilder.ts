@@ -15,4 +15,12 @@ export abstract class BasePlaylistBuilder {
   setAccessToken(accessToken: string) {
     this.accessToken = accessToken;
   }
+
+  /**
+   * Get the name of the class.
+   * @returns {string}
+   */
+  getName(): string {
+    return (<any>this).constructor.name;
+  }
 }
