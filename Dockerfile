@@ -23,6 +23,7 @@ COPY ./package.json /app/package.json
 RUN npm install
 
 COPY .env /app/.env
+COPY data /app/data
 COPY tsconfig.json /app/tsconfig.json
 COPY src /app/src
 COPY ormconfig.json /app/ormconfig.json

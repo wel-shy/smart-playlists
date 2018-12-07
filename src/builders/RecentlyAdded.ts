@@ -2,6 +2,7 @@ import { Track } from '../Track';
 import { SpotifyAPI } from '../SpotifyAPI';
 import { Playlist } from '../Playlist';
 import { BasePlaylistBuilder } from './BasePlaylistBuilder';
+import { SpotifyUser } from '../SpotifyUser';
 
 /**
  * Create a recently added playlist
@@ -59,7 +60,7 @@ export class RecentlyAdded extends BasePlaylistBuilder{
     const tracksToAdd: Track[] = [];
 
     if (recentlyAdded.length < this.limit) {
-      return lastAdded.splice(0, this.limit);
+      return lastAdded.reverse().splice(0, this.limit);
     }
 
     lastAdded.forEach((track, index) => {
@@ -91,8 +92,20 @@ export class RecentlyAdded extends BasePlaylistBuilder{
    * @returns {Promise<void>}
    */
   async execute(): Promise<void> {
+    const spotifyUser: SpotifyUser = await this.spotify.getUserInfo(this.accessToken);
     const usersLastAddedSongs: Track[] = (await this.getUsersLastTracks()).reverse();
-    const recentlyAddedPlaylist: Playlist = await this.getRecentlyAddedPlaylist();
+    let recentlyAddedPlaylist: Playlist = await this.getRecentlyAddedPlaylist();
+
+    if (!recentlyAddedPlaylist) {
+      recentlyAddedPlaylist = await this.spotify.createPlaylist(
+        'Recently Added',
+        'Your top 25 most recently saved songs. ' +
+        'Manage your subscription at https://smart-lists.dwelsh.uk',
+        spotifyUser.spotifyId,
+        this.accessToken,
+      );
+    }
+
     const recentlyAddedTracks: Track[] =
       await this.getTracksInRecentlyAddedPlaylist(recentlyAddedPlaylist.id);
     const tracksToAdd: Track[] = this.getTracksToAdd(usersLastAddedSongs, recentlyAddedTracks);
