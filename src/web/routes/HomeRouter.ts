@@ -1,22 +1,20 @@
 import { Request, Response, Router } from 'express';
-import { generateRandomString, writeToFile } from '../../Utils';
+import { generateRandomString, generateToken } from '../../Utils';
 import * as querystring from 'querystring';
 import * as request from 'request';
 import * as path from 'path';
+import { SpotifyAPI } from '../../SpotifyAPI';
+import { User } from '../entities/User';
+import { UserRepository } from '../repositories/UserRepository';
 
 /**
  * Get routes
  * @return Router
  */
-function home(): Router {
+function homeRouter(): Router {
   const router = Router();
-
   const stateKey = 'spotify_auth_state';
-
-  // Serve static html
-  router.get('/', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../../../index.html'));
-  });
+  const spotify = new SpotifyAPI();
 
   router.get('/login', (req: Request, res: Response) => {
     const state = generateRandomString(16);
@@ -71,23 +69,43 @@ function home(): Router {
         error: Error,
         response: request.RequestResponse,
         body: any) => {
-        const redirectUrl: string = `${process.env.HOST}?`;
+        const redirectUrl: string = 'https://smart-lists.dwelsh.uk?'; /*`${process.env.HOST}?`*/
         if (!error && response.statusCode === 200) {
           const access_token = body.access_token;
           const refresh_token = body.refresh_token;
 
+          let authToken: string;
+          let user: User;
+
             // store token to file
           if (access_token) {
             try {
-              await writeToFile(refresh_token, 'refresh_token.txt');
+              const spotifyUser = await spotify.getUserInfo(access_token);
+              const userRepository = new UserRepository();
+
+              user = new User(spotifyUser.email, spotifyUser.displayName, refresh_token);
+              const storedUser = await userRepository.getUserByEmail(user.email);
+
+              if (storedUser) {
+                user = storedUser;
+              } else {
+                await user.save();
+              }
+
+              authToken = generateToken(user);
+
             } catch (e) {
               console.error(e);
+              res.status(500);
+              return res.json({
+                error: e,
+              });
             }
           }
           res.redirect(redirectUrl +
               querystring.stringify({
-                access_token,
-                refresh_token,
+                authToken,
+                user: user.displayName,
               }));
         } else {
           res.redirect(redirectUrl +
@@ -99,33 +117,7 @@ function home(): Router {
     }
   });
 
-  router.get('/refresh_token/:token', (req: Request, res: Response) => {
-    // requesting access token from refresh token
-    const refreshToken: string = req.query.refresh_token || req.params.token;
-    const authOptions = {
-      url: 'https://accounts.spotify.com/api/token',
-      headers: {
-        Authorization: `Basic ${(new Buffer(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`)
-          .toString('base64'))}`,
-      },
-      form: {
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      },
-      json: true,
-    };
-
-    request.post(authOptions, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const accessToken = body.access_token;
-        res.send({
-          access_token: accessToken,
-        });
-      }
-    });
-  });
-
   return router;
 }
 
-export default home;
+export default homeRouter;

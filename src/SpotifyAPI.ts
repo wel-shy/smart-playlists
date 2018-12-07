@@ -2,13 +2,14 @@ import * as request from 'request';
 import { Track } from './Track';
 import { Playlist } from './Playlist';
 import axios from 'axios';
+import { SpotifyUser } from './SpotifyUser';
 
 /**
  * Emulate the spotify api.
  */
 export class SpotifyAPI {
   /**
-   * Get an auth token
+   * Get an web token
    * @param {string} refreshToken
    * @returns {Promise<string>}
    */
@@ -202,5 +203,24 @@ export class SpotifyAPI {
         }
       });
     });
+  }
+
+  /**
+   * Get the users information.
+   * @param {string} accessToken
+   * @returns {Promise<SpotifyUser>}
+   */
+  async getUserInfo(accessToken: string): Promise<SpotifyUser> {
+    const response = await axios.get(
+      'https://api.spotify.com/v1/me',
+      { headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      });
+
+    const userName = response.data.display_name;
+    const userEmail = response.data.email;
+
+    return new SpotifyUser(userName, userEmail);
   }
 }

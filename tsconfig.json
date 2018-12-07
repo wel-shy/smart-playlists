@@ -4,7 +4,9 @@
         "module": "commonjs",
         "outDir": "dist",
         "lib": ["ES2015"],
-        "noImplicitAny": true
+        "noImplicitAny": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
     },
     "compileOnSave": true,
     "include": [

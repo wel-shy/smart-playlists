@@ -1,22 +1,14 @@
 import { Track } from '../Track';
 import { SpotifyAPI } from '../SpotifyAPI';
 import { Playlist } from '../Playlist';
+import { IBuilder } from './IBuilder';
 
 /**
  * Create a recently added playlist
  */
-export class RecentlyAdded {
-  accessToken: string;
+export class RecentlyAdded extends IBuilder{
   private limit: number = 25;
   spotify: SpotifyAPI = new SpotifyAPI();
-
-  /**
-   * Give the smart playlist an access token.
-   * @param {string} accessToken
-   */
-  constructor(accessToken: string) {
-    this.accessToken = accessToken;
-  }
 
   /**
    * Get the users last added tracks.
@@ -42,7 +34,8 @@ export class RecentlyAdded {
    * @returns {Promise<Track[]>}
    */
   private async getTracksInRecentlyAddedPlaylist(playlistId: string): Promise<Track[]> {
-    const recentlyAddedTracks: Track[] = await this.spotify.getTracksInPlaylist(playlistId, this.accessToken);
+    const recentlyAddedTracks: Track[] =
+      await this.spotify.getTracksInPlaylist(playlistId, this.accessToken);
     return recentlyAddedTracks.sort(((a, b) => {
       if (+a.added > +b.added) {
         return 1;
@@ -116,4 +109,16 @@ export class RecentlyAdded {
       console.error(e);
     }
   }
+
+  toString(): string {
+    return 'Recently Added';
+  }
+
+  getInstance(): RecentlyAdded {
+    return new RecentlyAdded();
+  }
+}
+
+export default function getInstance(): RecentlyAdded {
+  return new RecentlyAdded();
 }
