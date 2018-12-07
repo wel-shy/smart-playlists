@@ -1,12 +1,12 @@
 /**
  * Playlist interface
  */
-export abstract class IBuilder {
+export abstract class BasePlaylistBuilder {
   accessToken: string;
 
   // All builders must have an execute function.
   abstract execute(): Promise<void>;
-  abstract getInstance(): IBuilder;
+  abstract getInstance(): BasePlaylistBuilder;
 
   /**
    * Set the access token

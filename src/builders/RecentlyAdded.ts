@@ -1,12 +1,14 @@
 import { Track } from '../Track';
 import { SpotifyAPI } from '../SpotifyAPI';
 import { Playlist } from '../Playlist';
-import { IBuilder } from './IBuilder';
+import { BasePlaylistBuilder } from './BasePlaylistBuilder';
 
 /**
  * Create a recently added playlist
+ * Create a new instance of this object through the PlaylistBuilderFactory.
+ * Use Prototype.PlaylistBuilderFactory.getPlaylistBuilder('RecentlyAdded');
  */
-export class RecentlyAdded extends IBuilder{
+export class RecentlyAdded extends BasePlaylistBuilder{
   private limit: number = 25;
   spotify: SpotifyAPI = new SpotifyAPI();
 
@@ -119,6 +121,11 @@ export class RecentlyAdded extends IBuilder{
   }
 }
 
+/**
+ * Default function must return an instance of the class.
+ * This is to allow the PlaylistBuilderFactory to initialise.
+ * @returns {RecentlyAdded}
+ */
 export default function getInstance(): RecentlyAdded {
   return new RecentlyAdded();
 }
